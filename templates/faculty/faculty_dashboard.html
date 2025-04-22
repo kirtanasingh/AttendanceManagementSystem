@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty Dashboard</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='faculty.css') }}" />
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Alpine.js scope -->
+  <div x-data="{ tab: 'dashboard', sidebarOpen: true }" :class="{ 'sidebar-hidden': !sidebarOpen }" class="layout">
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>Faculty Portal</h2>
+      <nav>
+        <a href="#" @click.prevent="tab = 'dashboard'">Dashboard</a>
+        <a href="#" @click.prevent="tab = 'mark'">Mark Attendance</a>
+        <a href="#" @click.prevent="tab = 'reports'">Reports</a>
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <div class="content-container">
+        
+        <!-- Dashboard Tab -->
+        <div class="tab-panel" x-show="tab === 'dashboard'" x-cloak>
+          <h1 class="dashboard-title">Welcome to the Faculty Dashboard</h1>
+
+          <!-- Add Subject -->
+          <div class="card add-subject-card">
+            <h3>Add Subject</h3>
+            <form method="POST" action="{{ url_for('add_subject_faculty') }}">
+              <div class="form-row">
+                <div class="form-col">
+                  <div class="form-group">
+                    <label for="subject_name">Subject Name</label>
+                    <input type="text" id="subject_name" name="subject_name" required placeholder="e.g. Advanced Mathematics">
+                  </div>
+                </div>
+                <div class="form-col">
+                  <div class="form-group">
+                    <label for="code">Subject Code</label>
+                    <input type="text" id="code" name="code" required placeholder="e.g. MATH101">
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-col">
+                  <div class="form-group">
+                    <label for="branch">Branch</label>
+                    <input type="text" id="branch" name="branch" required placeholder="e.g. Computer Science">
+                  </div>
+                </div>
+                <div class="form-col">
+                  <div class="form-group">
+                    <label for="class_number">Class Number (Room)</label>
+                    <input type="text" id="class_number" name="class_number" required placeholder="e.g. Room 203">
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="schedule">Schedule</label>
+                <input type="text" id="schedule" name="schedule" required placeholder="e.g. Monday 10AM, Wednesday 1PM">
+              </div>
+              
+              <div class="btn-container">
+                <button type="submit" class="btn">Add Subject</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Class List -->
+          <div class="card">
+            <h3>My Classes</h3>
+            {% if available_classes %}
+            <div class="classes-grid">
+              {% for cls in available_classes %}
+              <div class="class-card">
+                <strong>{{ cls.subject_name }}</strong>
+                <div class="class-info">
+                  <span>{{ cls.code }}</span> | <span>{{ cls.branch }}</span><br>
+                  <span>{{ cls.room_number }}</span> | <span>{{ cls.schedule }}</span>
+                </div>
+                <a href="{{ url_for('mark_attendance') }}?class_id={{ cls.id }}">
+                  <button class="btn">View Students</button>
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p>No classes created yet.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Mark Attendance Tab -->
+        <div class="tab-panel" x-show="tab === 'mark'" x-cloak>
+          <h1 class="dashboard-title">Mark Attendance</h1>
+          <iframe src="{{ url_for('mark_attendance') }}" title="Mark Attendance Frame"></iframe>
+        </div>
+
+        <!-- Reports Tab -->
+        <div class="tab-panel" x-show="tab === 'reports'" x-cloak>
+          <h1 class="dashboard-title">Attendance Reports</h1>
+          <iframe src="{{ url_for('faculty_reports') }}" title="Attendance Reports Frame"></iframe>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</body>
+</html>

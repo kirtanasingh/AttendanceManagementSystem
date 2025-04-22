@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Review Absence Requests</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; padding: 2rem; background: #f9fafb; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #1e3a8a; color: white; }
+    form { display: inline; }
+    .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; }
+    .approve { background: #16a34a; color: white; }
+    .reject { background: #dc2626; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Pending Absence Requests</h1>
+
+  {% if requests %}
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Reason</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for req in requests %}
+          <tr>
+            <td>{{ req.username }}</td>
+            <td>{{ req.reason }}</td>
+            <td>{{ req.date }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('approve_request', request_id=req.id) }}">
+                <button class="btn approve" type="submit">Approve</button>
+              </form>
+              <form method="POST" action="{{ url_for('reject_request', request_id=req.id) }}">
+                <button class="btn reject" type="submit">Reject</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No pending requests.</p>
+  {% endif %}
+</body>
+</html>

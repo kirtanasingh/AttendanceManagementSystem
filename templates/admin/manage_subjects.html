@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Subjects</title>
+  <script defer src="{{ url_for('static', filename='alpine.min.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; margin: 0; padding: 0; display: flex; justify-content: center; }
+    .container { max-width: 1200px; margin-top: 40px; width: 100%; padding: 0 20px; }
+    h1 { font-size: 2.5em; color: #1e3a8a; text-align: center; margin-bottom: 40px; }
+    .card-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .card { background: white; border-radius: 15px; padding: 20px; width: 340px; min-height: 250px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; justify-content: flex-start; }
+    .card h3 { font-size: 1.3em; margin: 0 0 10px; color: #1e3a8a; cursor: pointer; }
+    .content { margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; }
+    form label { display: block; margin: 8px 0 4px; font-weight: 500; }
+    form input { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 10px; }
+    form button { padding: 0.6rem 1.2rem; background-color: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    form button:hover { background-color: #1d4ed8; }
+  </style>
+</head>
+<body>
+<div class="container" x-data="{ active: '' }">
+  <h1>Manage Subjects</h1>
+  <div class="card-grid">
+
+    <div class="card">
+      <h3 @click="active = active === 'add' ? '' : 'add'">Add New Subject</h3>
+      <div class="content" x-show="active === 'add'" x-transition>
+        <form method="POST" action="/admin/add_subject">
+          <label>Subject Name</label>
+          <input type="text" name="name" required>
+          <label>Subject Code</label>
+          <input type="text" name="code" required>
+          <button type="submit">Add Subject</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 @click="active = active === 'delete' ? '' : 'delete'">Delete Subject</h3>
+      <div class="content" x-show="active === 'delete'" x-transition>
+        <form method="POST" action="/admin/delete_subject">
+          <label>Subject ID</label>
+          <input type="text" name="subject_id" required>
+          <button type="submit">Delete</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

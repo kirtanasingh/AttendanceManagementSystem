@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mark Attendance</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fb;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    
+    .content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    /* Back Button */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #555;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    
+    .back-btn svg {
+      margin-right: 8px;
+    }
+    
+    /* Headings */
+    .dashboard-title {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #0f172a;
+    }
+    
+    /* Cards */
+    .card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      color: #1e40af;
+      margin-bottom: 20px;
+    }
+    
+    /* Subject Info */
+    .subject-info {
+      background-color: #eef2ff;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .subject-info h4 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      color: #1e3a8a;
+    }
+    
+    .subject-info p {
+      margin: 0;
+      color: #4b5563;
+    }
+    
+    /* Date Selector */
+    .date-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .date-selector input[type="date"] {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    
+    /* Add Student Form */
+    .student-form {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+    
+    .student-form input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    
+    .add-student-btn {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    
+    .add-student-btn:hover {
+      background-color: #1d4ed8;
+    }
+    
+    /* Success Message */
+    .success-msg {
+      background-color: #d1fae5;
+      color: #065f46;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    /* Error Message */
+    .error-msg {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    /* Attendance Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #f8fafc;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    th {
+      background-color: #e0e7ff;
+      text-align: left;
+      padding: 12px 15px;
+      font-weight: 600;
+      color: #1e3a8a;
+    }
+    
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #edf2f7;
+    }
+    
+    /* Buttons */
+    .action-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .save-btn {
+      background-color: #10b981;
+      color: white;
+    }
+    
+    .save-btn:hover {
+      background-color: #059669;
+    }
+    
+    .download-btn {
+      background-color: #f3f4f6;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .download-btn:hover {
+      background-color: #e5e7eb;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: #6b7280;
+    }
+    
+    /* Message Animation */
+    .hide {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <!-- Back Button -->
+    <a href="/faculty/dashboard" class="back-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Dashboard
+    </a>
+
+    <h1 class="dashboard-title">Mark Attendance</h1>
+
+    {% if subject %}
+    <!-- Subject Info -->
+    <div class="subject-info">
+      <h4>{{ subject.name }} ({{ subject.branch }})</h4>
+      <p>Schedule: {{ subject.schedule }}</p>
+    </div>
+
+    <!-- Date Selector -->
+    <div class="card">
+      <h3>Attendance Date</h3>
+      <div class="date-selector">
+        <label for="attendance_date">Select Date:</label>
+        <input type="date" id="attendance_date" name="date" value="{{ today }}" onchange="loadAttendance()">
+      </div>
+    </div>
+
+    <!-- Add Student -->
+    <div class="card">
+      <h3>Add Student</h3>
+      <form id="addStudentForm" class="student-form">
+        <input type="text" name="student_name" id="student_name" placeholder="Student Name" required>
+        <input type="text" name="roll_number" id="roll_number" placeholder="Roll Number" required>
+        <input type="hidden" name="class_id" value="{{ class_id }}">
+        <button type="submit" class="add-student-btn" id="addStudentBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Add
+        </button>
+      </form>
+      <div id="successMessage" class="success-msg hide">
+        Student added successfully!
+      </div>
+      <div id="errorMessage" class="error-msg hide">
+        Error adding student.
+      </div>
+    </div>
+
+    <!-- Attendance List -->
+    <div class="card">
+      <h3>Attendance List</h3>
+      
+      <form id="attendanceForm">
+        <input type="hidden" name="class_id" value="{{ class_id }}">
+        <input type="hidden" name="attendance_date" id="current_date" value="{{ today }}">
+        
+        {% if students %}
+        <table>
+          <thead>
+            <tr>
+              <th>Sr. No</th>
+              <th>Roll Number</th>
+              <th>Student Name</th>
+              <th>Present</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceTableBody">
+            {% for student in students %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ student.roll_number }}</td>
+              <td>{{ student.name }}</td>
+              <td>
+                <input type="checkbox" name="student_{{ student.id }}" value="present" 
+                  {% if student.status == 'present' %}checked{% endif %}>
+                <input type="hidden" name="student_ids[]" value="{{ student.id }}">
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        
+        <div style="display: flex; gap: 15px; margin-top: 20px;">
+          <button type="submit" id="saveBtn" class="action-btn save-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Attendance
+          </button>
+          <a href="/download_attendance_csv/{{ class_id }}" class="action-btn download-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download CSV
+          </a>
+          <a href="/download_attendance_pdf/{{ class_id }}" class="action-btn download-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Download PDF
+          </a>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          No students added yet. Add students using the form above.
+        </div>
+        {% endif %}
+      </form>
+      
+      <div id="attendanceSavedMessage" class="success-msg hide">
+        Attendance saved successfully!
+      </div>
+    </div>
+    {% else %}
+    <!-- No Subject Selected -->
+    <div class="card">
+      <h3>No Subject Selected</h3>
+      <p>Please select a class from your dashboard to mark attendance.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    // Set today's date in the date field
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date().toISOString().split('T')[0];
+      const dateField = document.getElementById('attendance_date');
+      if (dateField) {
+        dateField.value = today;
+        document.getElementById('current_date').value = today;
+      }
+      
+      // Add student form submission
+      const addStudentForm = document.getElementById('addStudentForm');
+      if (addStudentForm) {
+        addStudentForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const formData = new FormData(addStudentForm);
+          const successMsg = document.getElementById('successMessage');
+          const errorMsg = document.getElementById('errorMessage');
+          const addBtn = document.getElementById('addStudentBtn');
+          
+          // Disable button while processing
+          addBtn.disabled = true;
+          addBtn.innerHTML = 'Adding...';
+          
+          // Hide any previous messages
+          successMsg.classList.add('hide');
+          errorMsg.classList.add('hide');
+          
+          fetch('/api/faculty/class/add_student', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              successMsg.classList.remove('hide');
+              addStudentForm.reset();
+              
+              // Reload the page to show the new student
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            } else {
+              errorMsg.textContent = data.message || 'Error adding student.';
+              errorMsg.classList.remove('hide');
+            }
+          })
+          .catch(error => {
+            errorMsg.textContent = 'An error occurred. Please try again.';
+            errorMsg.classList.remove('hide');
+            console.error('Error:', error);
+          })
+          .finally(() => {
+            // Re-enable the button
+            addBtn.disabled = false;
+            addBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Add`;
+            
+            // Hide messages after 3 seconds
+            setTimeout(() => {
+              successMsg.classList.add('hide');
+              errorMsg.classList.add('hide');
+            }, 3000);
+          });
+        });
+      }
+      
+      // Attendance form submission
+      const attendanceForm = document.getElementById('attendanceForm');
+      if (attendanceForm) {
+        attendanceForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const formData = new FormData(attendanceForm);
+          const saveBtn = document.getElementById('saveBtn');
+          const savedMsg = document.getElementById('attendanceSavedMessage');
+          
+          // Disable button while processing
+          saveBtn.disabled = true;
+          saveBtn.innerHTML = 'Saving...';
+          
+          // Hide any previous messages
+          savedMsg.classList.add('hide');
+          
+          fetch('/api/faculty/attendance/save', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              savedMsg.classList.remove('hide');
+            } else {
+              alert(data.message || 'Failed to save attendance');
+            }
+          })
+          .catch(error => {
+            alert('An error occurred while saving attendance');
+            console.error('Error:', error);
+          })
+          .finally(() => {
+            // Re-enable the button
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Attendance`;
+            
+            // Hide message after 3 seconds
+            setTimeout(() => {
+              savedMsg.classList.add('hide');
+            }, 3000);
+          });
+        });
+      }
+    });
+    
+    // Load attendance for the selected date
+    function loadAttendance() {
+      const date = document.getElementById('attendance_date').value;
+      document.getElementById('current_date').value = date;
+      
+      const classId = '{{ class_id }}';
+      window.location.href = `/mark_attendance?class_id=${classId}&date=${date}`;
+    }
+  </script>
+</body>
+</html>

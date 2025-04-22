@@ -1,0 +1,145 @@
+<!-- templates/faculty/attendance_selector.html -->
+<script id="subject-data" type="application/json">
+    {{ subjects|tojson }}
+  </script>
+  
+  <div class="p-6 max-w-4xl mx-auto" x-data="attendanceView()" x-init="init()">
+    <h2 class="text-2xl font-bold mb-6 text-blue-900">Mark Attendance</h2>
+  
+    <!-- Select Subject -->
+    <div class="mb-4">
+      <label class="font-semibold">Subject:</label>
+      <select x-model="selectedSubject" @change="fetchClasses" class="border p-2 rounded w-full">
+        <option value="" disabled selected>-- Select Subject --</option>
+        <template x-for="subject in subjects" :key="subject.id">
+          <option :value="subject.id" x-text="subject.name"></option>
+        </template>
+      </select>
+    </div>
+  
+    <!-- Select Class -->
+    <div class="mb-4" x-show="classes.length > 0">
+      <label class="font-semibold">Class:</label>
+      <select x-model="selectedClass" @change="fetchStudents" class="border p-2 rounded w-full">
+        <option value="" disabled selected>-- Select Class --</option>
+        <template x-for="cls in classes" :key="cls.id">
+          <option :value="cls.id" x-text="cls.room_number + ' (' + cls.schedule + ')'"></option>
+        </template>
+      </select>
+    </div>
+  
+    <!-- Add Student -->
+    <div class="mb-6" x-show="selectedClass">
+      <h3 class="text-lg font-semibold mb-2 text-gray-700">Add Student</h3>
+      <form @submit.prevent="addStudent">
+        <div class="flex flex-wrap gap-2">
+          <input type="text" x-model="newStudent.name" placeholder="Student Name" required class="p-2 border rounded w-1/2">
+          <input type="text" x-model="newStudent.roll" placeholder="Roll No" required class="p-2 border rounded w-1/3">
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Add</button>
+        </div>
+      </form>
+      <p x-show="addSuccess" class="text-green-600 mt-2">✅ Student added successfully!</p>
+      <p x-show="addError" class="text-red-600 mt-2">❌ Failed to add student.</p>
+    </div>
+  
+    <!-- Student List -->
+    <div class="mt-6" x-show="selectedClass">
+      <template x-if="students.length === 0">
+        <p class="text-gray-500 italic">No students enrolled in this class yet.</p>
+      </template>
+  
+      <template x-if="students.length > 0">
+        <form method="POST" :action="`/faculty/save_attendance`" class="mt-4">
+          <input type="hidden" name="class_id" :value="selectedClass">
+          <table class="w-full border text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-2">#</th>
+                <th class="p-2">Roll No</th>
+                <th class="p-2">Name</th>
+                <th class="p-2">Present</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="(student, idx) in students" :key="student.id">
+                <tr class="border-t">
+                  <td class="p-2" x-text="idx + 1"></td>
+                  <td class="p-2" x-text="student.roll_number"></td>
+                  <td class="p-2" x-text="student.name"></td>
+                  <td class="p-2 text-center">
+                    <input type="checkbox" name="present_ids[]" :value="student.id">
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+  
+          <!-- Actions -->
+          <div class="mt-4 flex gap-4">
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">✅ Save Attendance</button>
+            <a :href="`/faculty/class/${selectedClass}/download/csv`"
+               class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">📥 Download CSV</a>
+            <a :href="`/faculty/class/${selectedClass}/download/pdf`"
+               class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">📄 Download PDF</a>
+          </div>
+        </form>
+      </template>
+    </div>
+  </div>
+  
+  <script>
+  function attendanceView() {
+    return {
+      subjects: JSON.parse(document.getElementById('subject-data').textContent),
+      classes: [],
+      students: [],
+      selectedSubject: '',
+      selectedClass: '',
+      newStudent: { name: '', roll: '' },
+      addSuccess: false,
+      addError: false,
+  
+      init() {},
+  
+      fetchClasses() {
+        this.classes = [];
+        this.students = [];
+        this.selectedClass = '';
+        fetch(`/faculty/classes/${this.selectedSubject}`)
+          .then(res => res.json())
+          .then(data => { this.classes = data; });
+      },
+  
+      fetchStudents() {
+        this.students = [];
+        fetch(`/faculty/class/${this.selectedClass}/students`)
+          .then(res => res.json())
+          .then(data => { this.students = data; });
+      },
+  
+      addStudent() {
+        this.addSuccess = false;
+        this.addError = false;
+        fetch(`/faculty/class/${this.selectedClass}/add_student`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            name: this.newStudent.name,
+            roll_number: this.newStudent.roll
+          })
+        })
+        .then(res => {
+          if (res.ok) {
+            this.newStudent.name = '';
+            this.newStudent.roll = '';
+            this.addSuccess = true;
+            this.fetchStudents();
+          } else {
+            this.addError = true;
+          }
+        });
+      }
+    };
+  }
+  </script>
+  

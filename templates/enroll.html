@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Faculty Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='faculty.css') }}">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <h2>School Attendance</h2>
+        <nav>
+            <a href="{{ url_for('faculty_dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('faculty_subjects') }}">My Subjects</a>
+            <a href="{{ url_for('mark_attendance') }}">Mark Attendance</a>
+            <a href="{{ url_for('faculty_reports') }}">Reports</a>
+            <a href="{{ url_for('logout') }}" class="logout">Sign out</a>
+        </nav>
+    </aside>
+    <main class="content">
+        <h1>Faculty Dashboard</h1>
+        <p>Welcome back, {{ faculty_name }}.</p>
+
+        <h2>Today's Classes</h2>
+        <div class="card-container">
+            {% for cls in todays_classes %}
+                <div class="card {{ 'now' if cls.is_now else 'upcoming' }}">
+                    <h3>{{ cls.subject_name }}</h3>
+                    <p>{{ cls.room }}<br>{{ cls.time }}</p>
+                    <p>{{ cls.students_enrolled }} students enrolled</p>
+                    {% if cls.is_now %}
+                        <a href="{{ url_for('mark_attendance', subject_id=cls.subject_id) }}">Mark Attendance</a>
+                    {% else %}
+                        <span class="badge">Upcoming</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <h2>My Subjects</h2>
+        <table class="subjects-table">
+            <tr>
+                <th>Subject</th><th>Schedule</th><th>Enrolled</th><th>Attendance</th><th>Actions</th>
+            </tr>
+            {% for subject in subjects %}
+            <tr>
+                <td>{{ subject.code }} - {{ subject.name }}</td>
+                <td>{{ subject.schedule }}</td>
+                <td>{{ subject.enrolled }}</td>
+                <td>{{ subject.attendance_rate }}%</td>
+                <td><a href="{{ url_for('mark_attendance', subject_id=subject.id) }}">View</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </main>
+</div>
+</body>
+</html>

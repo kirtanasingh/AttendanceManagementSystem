@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Attendance System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --primary-hover: #3749a4;
+            --primary-light: #eff6ff;
+            --secondary-color: #2563eb;
+            --secondary-hover: #1d4ed8;
+            --text-dark: #111827;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --border-color: #e5e7eb;
+            --background-light: #f9f9f9;
+            --background-white: #ffffff;
+            --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3749a4 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            background-color: var(--background-white);
+            animation: fadeIn 0.5s ease;
+            max-height: 600px; /* Added height restriction */
+        }
+
+        .auth-image {
+            flex: 1;
+            background-image: url('/api/placeholder/500/600');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 30px;
+            position: relative;
+            color: white;
+        }
+
+        .auth-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(30, 58, 138, 0.3), rgba(30, 58, 138, 0.8));
+        }
+
+        .auth-image-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-image-content h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.75rem;
+            color: white;
+        }
+
+        .auth-image-content p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+            opacity: 0.9;
+        }
+
+        .auth-form {
+            flex: 1;
+            padding: 25px 30px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .auth-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .auth-header img {
+            width: 50px;
+            height: auto;
+            margin-right: 12px;
+        }
+
+        .auth-header .title {
+            flex: 1;
+        }
+
+        .auth-header h1 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .auth-header p {
+            font-size: 0.85rem;
+            color: var(--text-medium);
+            margin: 0;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--text-medium);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #9ca3af;
+        }
+
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .error:before {
+            content: "⚠";
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        .auth-footer {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-medium);
+        }
+
+        .auth-footer a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .auth-footer a:hover {
+            color: var(--secondary-hover);
+            text-decoration: underline;
+        }
+
+        .tab-switcher {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        #registerForm {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 992px) {
+            .auth-container {
+                flex-direction: column;
+                max-width: 600px;
+                max-height: none;
+            }
+
+            .auth-image {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .auth-form {
+                padding: 20px 15px;
+            }
+
+            .form-title {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-image">
+            <div class="auth-image-content">
+                <h2>Welcome to VIT</h2>
+                <p>Streamlining attendance tracking for a better educational experience.</p>
+            </div>
+        </div>
+        <div class="auth-form">
+            <div class="auth-header">
+                <img src="static/vit.png" alt="VIT Logo">
+                <div class="title">
+                    <h1>Vidyalankar Institute of Technology</h1>
+                    <p>Attendance Management System</p>
+                </div>
+            </div>
+
+            <div class="tab-switcher">
+                <div id="loginTab" class="tab active" onclick="switchTab('login')">Login</div>
+                <div id="registerTab" class="tab" onclick="switchTab('register')">Register</div>
+            </div>
+
+            <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+                <h2 class="form-title">Sign In</h2>
+                
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" required autofocus placeholder="Enter your username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" required placeholder="Enter your password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role" name="role" class="form-control" required>
+                        <option value="" disabled selected>Select your role</option>
+                        <option value="student">Student</option>
+                        <option value="faculty">Faculty</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn">Sign In</button>
+                
+                {% if error %}
+                    <div class="error">{{ error }}</div>
+                {% endif %}
+            </form>
+
+            <form id="registerForm" method="POST" action="{{ url_for('register') }}">
+                <h2 class="form-title">Create Account</h2>
+                
+                <div class="form-group">
+                    <label for="reg-username">Username</label>
+                    <input type="text" id="reg-username" name="username" class="form-control" required placeholder="Choose a username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-password">Password</label>
+                    <input type="password" id="reg-password" name="password" class="form-control" required placeholder="Create a password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-role">Role</label>
+                    <select id="reg-role" name="role" class="form-control" required>
+                        <option value="" disabled selected>Select your role</option>
+                        <option value="student">Student</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>© 2025 Vidyalankar Institute of Technology</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            if (tab === 'login') {
+                document.getElementById('loginTab').classList.add('active');
+                document.getElementById('registerTab').classList.remove('active');
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+            } else {
+                document.getElementById('loginTab').classList.remove('active');
+                document.getElementById('registerTab').classList.add('active');
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

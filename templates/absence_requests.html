@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Absence</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='student.css') }}">
+  <style>
+    [x-cloak] { display: none !important; }
+    
+    /* Base styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Layout styles */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #1e3a8a;
+      color: white;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .content {
+      flex: 1;
+      padding: 2rem;
+      background-color: #f3f4f6;
+    }
+
+    .content-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Sidebar styles */
+    .sidebar h2 {
+      margin-top: 0;
+      margin-bottom: 2rem;
+      font-size: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 1rem;
+    }
+
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sidebar nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar nav a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar nav a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      font-weight: 500;
+    }
+
+    .sidebar nav a.logout {
+      margin-top: auto;
+      color: #f87171;
+    }
+
+    /* Card styles */
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Dashboard title */
+    .dashboard-title {
+      font-size: 1.8rem;
+      color: #111827;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    /* Form styles */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      color: #4b5563;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-col {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    /* Button styles */
+    .btn {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background-color: #1d4ed8;
+    }
+
+    .btn-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
+    /* Help text */
+    .help-text {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+
+    /* Absence request history */
+    .absence-history {
+      margin-top: 2rem;
+    }
+
+    .absence-history h3 {
+      color: #1e3a8a;
+      margin-bottom: 1rem;
+    }
+
+    .attendance-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .attendance-table th {
+      background-color: #f0f5ff;
+      color: #1e3a8a;
+      font-weight: 600;
+      text-align: left;
+      padding: 14px 16px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .attendance-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      color: #4b5563;
+    }
+
+    .attendance-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .attendance-table tr:hover {
+      background-color: #f9fafb;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-pending {
+      background-color: #fef3c7;
+      color: #d97706;
+    }
+
+    .status-approved {
+      background-color: #d1fae5;
+      color: #059669;
+    }
+
+    .status-rejected {
+      background-color: #fee2e2;
+      color: #dc2626;
+    }
+
+    /* Sidebar toggle button */
+    .sidebar-toggle {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 100;
+      background-color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 24px;
+      width: 30px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .sidebar-toggle span {
+      width: 100%;
+      height: 2px;
+      background-color: #1e3a8a;
+      transition: all 0.3s ease;
+    }
+
+    /* Success Message */
+    .success-msg {
+      color: #10b981;
+      background-color: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid #10b981;
+      padding: 10px 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .success-msg::before {
+      content: "✓";
+      margin-right: 10px;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .layout {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        padding: 1rem;
+      }
+      
+      .content {
+        padding: 1rem;
+      }
+      
+      .sidebar-hidden .sidebar {
+        display: none;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Alpine.js scope -->
+  <div x-data="{ sidebarOpen: true }" :class="{ 'sidebar-hidden': !sidebarOpen }" class="layout">
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>Student Portal</h2>
+      <nav>
+        <a href="{{ url_for('student_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('absence_requests') }}" class="active">Request Absence</a>
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <div class="content-container">
+        <h1 class="dashboard-title">Request Absence</h1>
+
+        <!-- Success Message (if applicable) -->
+        {% if request.args.get('success') %}
+        <div class="success-msg">
+          Your absence request has been submitted successfully.
+        </div>
+        {% endif %}
+        
+        <!-- Request Form -->
+        <div class="card">
+          <form method="POST" action="{{ url_for('absence_requests') }}">
+            <div class="form-group">
+              <label for="reason">Reason for Absence</label>
+              <textarea id="reason" name="reason" required></textarea>
+              <div class="help-text">Please provide detailed information about your absence reason.</div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="start_date">Start Date</label>
+                  <input type="date" id="start_date" name="start_date" required>
+                </div>
+              </div>
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="end_date">End Date</label>
+                  <input type="date" id="end_date" name="end_date" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-container">
+              <button type="submit" class="btn">Submit Request</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Previous Requests -->
+        <div class="card absence-history">
+          <h3>Previous Requests</h3>
+          
+          {% if absence_requests %}
+          <table class="attendance-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Reason</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for request in absence_requests %}
+              <tr>
+                <td>{{ request.date }}</td>
+                <td>{{ request.reason }}</td>
+                <td>
+                  <span class="status-badge status-{{ request.status }}">
+                    {{ request.status | capitalize }}
+                  </span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p>No previous absence requests found.</p>
+          {% endif %}
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

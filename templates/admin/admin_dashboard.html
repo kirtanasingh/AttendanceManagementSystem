@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script src="{{ url_for('static', filename='alpine.min.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e3a8a;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-light: #f7f9fc;
+            --gray: #e5e7eb;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--gray-light);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(to bottom, var(--primary-dark), #0f2350);
+            min-height: 100vh;
+            color: white;
+            padding: 1.25rem;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-left: 0.75rem;
+        }
+
+        .sidebar-nav {
+            margin-top: 1rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-link.active {
+            background: var(--primary-light);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-icon {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .header-subtitle {
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: var(--white);
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 0.75rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stats-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stats-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .stats-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .icon-faculty { background: var(--primary-light); }
+        .icon-students { background: var(--accent); }
+        .icon-subjects { background: var(--success); }
+        .icon-classes { background: var(--warning); }
+
+        .stats-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stats-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .quick-actions {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 0.75rem;
+            color: var(--primary-light);
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-card {
+            background: var(--gray-light);
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .action-card:hover .action-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: var(--white);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-description {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .action-card:hover .action-description {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .recent-section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+                padding: 1rem 0.5rem;
+            }
+
+            .sidebar-header h2,
+            .nav-text {
+                display: none;
+            }
+
+            .nav-icon {
+                margin-right: 0;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+
+            .sidebar-header {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <i class="fas fa-graduation-cap fa-lg"></i>
+        <h2>Admin Portal</h2>
+    </div>
+
+    <div class="sidebar-nav">
+        <div class="nav-item">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link active">
+                <i class="fas fa-tachometer-alt nav-icon"></i>
+                <span class="nav-text">Dashboard</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ url_for('manage_faculty') }}" class="nav-link">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span class="nav-text">Faculty</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ url_for('manage_students') }}" class="nav-link">
+                <i class="fas fa-user-graduate nav-icon"></i>
+                <span class="nav-text">Students</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ url_for('manage_subjects') }}" class="nav-link">
+                <i class="fas fa-book nav-icon"></i>
+                <span class="nav-text">Subjects</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ url_for('manage_classes') }}" class="nav-link">
+                <i class="fas fa-calendar-alt nav-icon"></i>
+                <span class="nav-text">Classes</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ url_for('admin_reports') }}" class="nav-link">
+                <i class="fas fa-chart-bar nav-icon"></i>
+                <span class="nav-text">Reports</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ url_for('review_requests') }}" class="nav-link">
+                <i class="fas fa-tasks nav-icon"></i>
+                <span class="nav-text">Absence Requests</span>
+            </a>
+        </div>
+        <div class="nav-item" style="margin-top: auto;">
+            <a href="{{ url_for('logout') }}" class="nav-link">
+                <i class="fas fa-sign-out-alt nav-icon"></i>
+                <span class="nav-text">Logout</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="dashboard-header">
+        <div class="header-title">
+            <h1>Admin Dashboard</h1>
+            <div class="header-subtitle">Welcome back, Admin! Here's an overview of your system.</div>
+        </div>
+        <div class="user-profile">
+            <div class="user-avatar">A</div>
+            <div class="user-info">Admin User</div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stats-card">
+            <div class="stats-header">
+                <div class="stats-title">Faculty Members</div>
+                <div class="stats-icon icon-faculty">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+            </div>
+            <div class="stats-value">{{ stats.total_faculty }}</div>
+            <div class="stats-label">Total faculty registered</div>
+        </div>
+
+        <div class="stats-card">
+            <div class="stats-header">
+                <div class="stats-title">Students</div>
+                <div class="stats-icon icon-students">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+            </div>
+            <div class="stats-value">{{ stats.total_students }}</div>
+            <div class="stats-label">Total students enrolled</div>
+        </div>
+
+        <div class="stats-card">
+            <div class="stats-header">
+                <div class="stats-title">Subjects</div>
+                <div class="stats-icon icon-subjects">
+                    <i class="fas fa-book"></i>
+                </div>
+            </div>
+            <div class="stats-value">{{ stats.total_subjects }}</div>
+            <div class="stats-label">Total subjects available</div>
+        </div>
+
+        <div class="stats-card">
+            <div class="stats-header">
+                <div class="stats-title">Classes</div>
+                <div class="stats-icon icon-classes">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+            </div>
+            <div class="stats-value">{{ stats.total_classes }}</div>
+            <div class="stats-label">Total classes scheduled</div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <div class="section-title">
+            <i class="fas fa-bolt"></i> Quick Actions
+        </div>
+        <div class="actions-grid">
+            <a href="{{ url_for('manage_faculty') }}" style="text-decoration:none; color:inherit;">
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="action-title">Add Faculty</div>
+                    <div class="action-description">Register new faculty members</div>
+                </div>
+            </a>
+            <a href="{{ url_for('manage_students') }}" style="text-decoration:none; color:inherit;">
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="action-title">Add Student</div>
+                    <div class="action-description">Enroll new students</div>
+                </div>
+            </a>
+            <a href="{{ url_for('manage_classes') }}" style="text-decoration:none; color:inherit;">
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <div class="action-title">Create Class</div>
+                    <div class="action-description">Schedule new classes</div>
+                </div>
+            </a>
+            <a href="{{ url_for('review_requests') }}" style="text-decoration:none; color:inherit;">
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="action-title">Review Requests</div>
+                    <div class="action-description">Manage absence requests</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="recent-section">
+        <div class="section-title">
+            <i class="fas fa-chart-line"></i> System Overview
+        </div>
+        <!-- Placeholder for a chart or additional stats -->
+        <div style="height: 200px; display: flex; align-items: center; justify-content: center; color: var(--text-light);">
+            <p>System metrics and analytics will appear here</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

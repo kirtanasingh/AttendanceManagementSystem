@@ -1,0 +1,12 @@
+
+<h2>Your Attendance</h2>
+<table>
+  <tr><th>Date</th><th>Subject</th><th>Status</th></tr>
+  {% for r in records %}
+    <tr>
+      <td>{{ r.date }}</td>
+      <td>{{ r.subject_name }}</td>
+      <td>{{ r.status }}</td>
+    </tr>
+  {% endfor %}
+</table>

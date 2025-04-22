@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/student.css">
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Alpine.js scope -->
+  <div x-data="{ sidebarOpen: true }" :class="{'sidebar-hidden': !sidebarOpen}" class="layout">
+    
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>Student Portal</h2>
+      <nav>
+        <a href="{{ url_for('student_dashboard') }}" class="active">Dashboard</a>
+        <a href="{{ url_for('absence_requests') }}">Request Absence</a>
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="student-content">
+      <div class="content-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+          <div class="student-welcome">Welcome to Your Dashboard</div>
+          <div class="student-profile">
+            <div class="student-avatar">
+              {{ session.get('name', 'S')[0] }}
+            </div>
+            <div>
+              <div>{{ session.get('name', 'Student') }}</div>
+              <div style="color: #6b7280; font-size: 0.9rem;">{{ session.get('user_id') }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+          <div class="summary-card">
+            <h4>Total Subjects</h4>
+            <div class="stat-value">{{ subjects|length }}</div>
+            <p style="color: #6b7280; margin-top: 0.5rem; font-size: 0.9rem;">
+              {% if subjects %}{{ subjects|length }} course(s) this semester{% else %}No courses enrolled{% endif %}
+            </p>
+          </div>
+          <div class="summary-card">
+            <h4>Average Attendance</h4>
+            <div class="stat-value">
+              {% if subjects %}
+                {{ avg_attendance|round|int }}%
+              {% else %}
+                0%
+              {% endif %}
+            </div>
+            <p style="color: #6b7280; margin-top: 0.5rem; font-size: 0.9rem;">
+              {% if avg_attendance >= 75 %}Good standing{% elif avg_attendance >= 60 %}Needs improvement{% else %}Critical{% endif %}
+            </p>
+          </div>
+          <div class="summary-card">
+            <h4>Total Classes</h4>
+            <div class="stat-value">{{ total_classes }}</div>
+            <p style="color: #6b7280; margin-top: 0.5rem; font-size: 0.9rem;">
+              {% if total_classes > 0 %}Classes attended this semester{% else %}No classes recorded yet{% endif %}
+            </p>
+          </div>
+        </div>
+
+        <!-- Subjects Card -->
+        <div class="card">
+          <h3>Your Subjects & Attendance</h3>
+          {% if subjects %}
+          <div class="card-container">
+            {% for subject in subjects %}
+            <div class="subject-card">
+              <h4>{{ subject.subject_name }}</h4>
+              <div class="subject-info">
+                {% if subject.code %}
+                <p>{{ subject.code }} | {{ subject.branch }}</p>
+                {% endif %}
+                {% if subject.schedule %}
+                <p>{{ subject.schedule }}</p>
+                {% endif %}
+              </div>
+              <div class="attendance-percentage {% if subject.attendance_percent >= 75 %}attendance-good{% elif subject.attendance_percent >= 60 %}attendance-warning{% else %}attendance-danger{% endif %}">
+                {{ subject.attendance_percent|round|int or 0 }}%
+              </div>
+              <a class="btn" href="/student/attendance/{{ subject.id }}">View Details</a>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <h4>No Subjects Found</h4>
+            <p>You are not enrolled in any subjects yet.</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Recent Absences -->
+        <div class="card">
+          <h3>Recent Absences</h3>
+          {% if recent_absences %}
+            <table class="attendance-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for absence in recent_absences %}
+                <tr class="{{ absence.status }}">
+                  <td>{{ absence.date }}</td>
+                  <td>{{ absence.reason }}</td>
+                  <td>
+                    <span class="status-{{ absence.status }}">{{ absence.status|capitalize }}</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div style="margin-top: 1.5rem; text-align: right;">
+              <a href="{{ url_for('absence_requests') }}" class="btn">Request New Absence</a>
+            </div>
+          {% else %}
+            <div class="empty-state">
+              <h4>No recent absences</h4>
+              <p>You don't have any absence requests yet.</p>
+              <a href="{{ url_for('absence_requests') }}" class="btn" style="margin-top: 1rem;">Request Absence</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Add any additional JavaScript functionality here
+    document.addEventListener('alpine:init', () => {
+      // AlpineJS initialization if needed
+    });
+  </script>
+</body>
+</html>
